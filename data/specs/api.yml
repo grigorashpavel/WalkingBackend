@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: Спека Бэкенда
+  version: 1.0.0
+
+tags:
+  - name: session
+    description: Операции аутентификации и управления сессиями
+  - name: resources
+    description: Все ресурсы, которые не используются в ручках, но должны быть сгенерированы
+  - name: route
+    description: Ручки для построения маршрута
+  - name: history
+    description: Ручки для получения истории машрутов
+  - name: profile
+    description: Ручки для получения профиля
+  - name: feedback
+    description: Для опросов
+
+paths:
+  /v1/start-session:
+    post:
+      tags: [session]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+      summary: Начало сессии
+      description: Запускает новую сессию после проверки Yandex OAuth 2.0 токена
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/StartSessionV1Request'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/StartSessionV1Response'
+
+  /v1/end-session:
+    post:
+      tags: [session]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Завершение сессии
+      description: Завершает текущую сессию пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/EndSessionV1Request'
+      responses:
+        '200':
+          description: Сессия успешно завершена
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/EndSessionV1Response'
+
+  /v1/route/get-point:
+    post:
+      tags: [route]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Нахождение ближайшей вершины графа
+      description: |
+        Опираясь на координаты ищет ближайшую вершину графа путей, для построения пути 
+        (сейчас построение возможно только между вершинами)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/GetPointV1Request'
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/GetPointV1Response'
+
+  /v1/route/build-route:
+    post:
+      tags: [route]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Построение машрута
+      description: |
+        Строит маршрут между заданными вершинами графа, может принимать веса дорог
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/BuildRouteV1Request'
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/BuildRouteV1Response'
+
+  /v1/route/start-journey:
+    post:
+      tags: [route]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Маркрерная ручка, изменит статусы маршрута
+      description: |
+        Изменяет состояние данных маршрута, если пользователя маршрут удволетворил
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/StartJourneyV1Request'
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/StartJourneyV1Response'
+
+  /v1/history/get-routes:
+    get:
+      tags: [history]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Для получения списка превью маршрутов
+      description: Вернет список маршрутов формата превью (обрезанные данные)
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/GetRoutesHistoryV1Response'
+
+  /v1/history/get-route:
+    post:
+      tags: [history]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Вернет маршрут из истории
+      description: Получение более подробного маршрута по id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/GetRouteFromHistoryV1Request'
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/GetRouteFromHistoryV1Response'
+
+  /v1/profile:
+    get:
+      tags: [profile]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Дает инфу из Яндекс-ID
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/GetProfileV1Response'
+  /v1/feedback:
+    post:
+      tags: [feedback]
+      parameters:
+        - $ref: 'parameters.yml#/components/parameters/SessionId'
+        - $ref: 'parameters.yml#/components/parameters/IdempotencyKey'
+        - $ref: 'parameters.yml#/components/parameters/DeviceId'
+        - $ref: 'parameters.yml#/components/parameters/ClientVersion'
+        - $ref: 'parameters.yml#/components/parameters/RequestLanguage'
+      summary: Для фидбека по маршруту и работе приложения
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yml#/components/schemas/FeedbackV1Request'
+      responses:
+        '200':
+          description: Ответ
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/FeedbackV1Response'
+
+  /resources:
+    get:
+      tags: [resources]
+      responses:
+        '200':
+          description: Никогда не будет использоваться - необходимо для генерации моделей
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yml#/components/schemas/Resources'
