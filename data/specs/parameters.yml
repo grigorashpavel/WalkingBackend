@@ -1,0 +1,55 @@
+components:
+  parameters:
+    SessionId:
+      in: header
+      name: X-Session-Id
+      required: true
+      schema:
+        type: string
+        nullable: false
+        format: uuid
+      example: "d3d94468-2d20-49d4-871f-7c2d12abf9e1"
+    TraceId:
+      in: header
+      name: X-Trace-Id
+      required: true
+      schema:
+        type: string
+        nullable: false
+        format: uuid
+      example: "d3d94468-2d20-49d4-871f-7c2d12abf9e1"
+    IdempotencyKey:
+      in: header
+      name: X-Idempotency-Key
+      required: true
+      schema:
+        type: string
+        nullable: false
+        format: uuid
+      example: "d3d94468-2d20-49d4-871f-7c2d12abf9e1"
+    DeviceId:
+      in: header
+      name: X-Device-Id
+      required: true
+      schema:
+        type: string
+        nullable: false
+      example: "d3d9446dsf283h"
+    ClientVersion:
+      in: header
+      name: X-Client-Version
+      required: true
+      schema:
+        type: string
+        nullable: false
+      example: "0.0.1"
+    RequestLanguage:
+      in: header
+      name: X-Request-Language
+      required: true
+      schema:
+        type: string
+        enum:
+          - ru
+          - en
+        nullable: false

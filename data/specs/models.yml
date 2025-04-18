@@ -1,0 +1,465 @@
+components:
+  schemas:
+    StartSessionV1Request:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Yandex OAuth 2.0 токен
+          example: "AQAAAABxxxxxxaB9hZAAUxxxxxxZQmX7zJqgXxxxxxx"
+      required:
+        - token
+
+    StartSessionV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/StartSessionSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    StartSessionSuccessData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: Уникальный идентификатор сессии
+        expires_at:
+          type: integer
+          format: int64
+          description: Время завершения сессии
+        started_at:
+          type: integer
+          format: int64
+          description: Временная метка начала сессии
+        message:
+          type: string
+      required:
+        - id
+        - expires_in
+        - started_at
+
+    EndSessionV1Request:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Идентификатор сессии
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      required:
+        - session_id
+
+    EndSessionV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/EndSessionSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    EndSessionSuccessData:
+      type: object
+      properties:
+        is_closed:
+          type: boolean
+          description: результат закрытия сессии
+        message:
+          type: string
+      required:
+        - is_closed
+
+    GetPointV1Request:
+      type: object
+      properties:
+        point:
+          $ref: '#/components/schemas/Point'
+      required:
+        - point
+
+    GetPointV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/GetPointSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    GetPointSuccessData:
+      type: object
+      properties:
+        point:
+          $ref: '#/components/schemas/Point'
+        message:
+          type: string
+      required:
+        - point
+
+    BuildRouteV1Request:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название маршрута
+        points:
+          type: array
+          minItems: 2
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/Point'
+          description: Список точек маршрута (от 2 до 8 точек)
+        weights:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+            minimum: 0.0
+            maximum: 1.0
+          description: |
+            Веса объектов в формате "категория.тег". 
+            Примеры допустимых ключей:
+            - amenity.hospital
+            - emergency.fire_hydrant
+            - shop.* (для всех объектов категории)
+          example:
+            "amenity.hospital": 1.0
+            "emergency.fire_hydrant": 0.85
+            "shop.*": 0.3
+            "wheelchair.yes": 0.4
+            "surface.paved": 0.6
+      required:
+        - points
+
+    BuildRouteV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/BuildRouteSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    BuildRouteSuccessData:
+      type: object
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        message:
+          type: string
+      required:
+        - route
+        - message
+
+    StartJourneyV1Request:
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
+
+    StartJourneyV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/StartJourneySuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    StartJourneySuccessData:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      required:
+        - id
+        - message
+
+    GetRoutesHistoryV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/GetRoutesSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    GetRoutesSuccessData:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutePreview'
+        message:
+          type: string
+      required:
+        - routes
+
+    GetRouteFromHistoryV1Request:
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
+
+    GetRouteFromHistoryV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/GetRouteFromHistorySuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    GetRouteFromHistorySuccessData:
+      type: object
+      properties:
+        route:
+          $ref: '#/components/schemas/Route'
+        message:
+          type: string
+      required:
+        - route
+
+    GetProfileV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/GetProfileSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    GetProfileSuccessData:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/YandexPassportUserInfoEntity'
+        message:
+          type: string
+      required:
+        - profile
+
+    FeedbackV1Request:
+      type: object
+      properties:
+        route_id:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        message:
+          type: string
+      required:
+        - route_id
+        - rating
+        - message
+
+    FeedbackV1Response:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ResponseStatusV1'
+        success_data:
+          $ref: '#/components/schemas/FeedbackSuccessData'
+        fail_data:
+          $ref: '#/components/schemas/ResponseFailDataV1'
+      required:
+        - status
+
+    FeedbackSuccessData:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      required:
+        - id
+        - message
+
+    RoutePreview:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    Route:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        path:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
+          description: Упорядоченный список точек маршрута
+      required:
+        - id
+        - path
+        - name
+
+
+    Point:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+        lon:
+          type: number
+          format: float
+      required:
+        - lat
+        - lon
+
+    ResponseFailDataV1:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        trace_id:
+          type: string
+        deeplink:
+          type: string
+      required:
+        - title
+
+    ResponseStatusV1:
+      type: string
+      enum:
+        - SUCCESS
+        - FAIL
+
+    YandexPassportUserInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        login:
+          type: string
+        client_id:
+          type: string
+        display_name:
+          type: string
+        real_name:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        sex:
+          type: string
+        default_email:
+          type: string
+      required:
+        - id
+        - login
+        - client_id
+        - display_name
+        - real_name
+        - first_name
+        - last_name
+        - sex
+        - default_email
+
+    YandexPassportUserInfoEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          description: сгенерированный Id на основании немутабельных login и email (hashCode() от строки "login|email")
+        login:
+          type: string
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        avatar:
+          type: string
+          description: ссылка на картинку пользователя из Yandex Id
+      required:
+        - id
+        - login
+        - email
+        - first_name
+        - second_name
+
+    SessionEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        started_at:
+          type: integer
+          format: int64
+        expires_at:
+          type: integer
+          format: int64
+        user_info:
+          $ref: '#/components/schemas/YandexPassportUserInfoEntity'
+      required:
+        - id
+        - started_at
+        - expires_at
+        - user_info
+
+    Resources:
+      type: object
+      properties:
+        a:
+          $ref: '#/components/schemas/YandexPassportUserInfoEntity'
+        b:
+          $ref: '#/components/schemas/SessionEntity'
+        c:
+          $ref: '#/components/schemas/YandexPassportUserInfoResponse'
+
+
+
