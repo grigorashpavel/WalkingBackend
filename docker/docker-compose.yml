@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    image: cr.yandex/${REGISTRY_ID}/backend:latest
+    restart: always
+    networks:
+      - public_network
+      - internal_network
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - backend_cache:/app/cache
+
+  math-model:
+    image: cr.yandex/${REGISTRY_ID}/math-model:latest
+    restart: always
+    networks:
+      - internal_network
+    volumes:
+      - model_cache:/app/cache
+      - model_data:/app/data
+
+networks:
+  public_network:
+  internal_network:
+    internal: true
+
+volumes:
+  backend_cache:
+  model_cache:
+  model_data:
