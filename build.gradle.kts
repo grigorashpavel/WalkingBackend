@@ -62,6 +62,13 @@ openApiGenerate {
 	)
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+	dependsOn(tasks.openApiGenerate)
+	kotlinOptions {
+		jvmTarget = "17"
+	}
+}
+
 sourceSets.main {
 	java.srcDirs("$buildDir/generated/src/main/kotlin")
 }

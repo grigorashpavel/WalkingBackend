@@ -1,0 +1,67 @@
+name: Backend Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Login to Yandex CR
+        run: |
+          echo "${{ secrets.YC_PASSWORD }}" | docker login \
+            --username json_key \
+            --password-stdin \
+            cr.yandex
+
+      - name: Build and push
+        run: |
+          docker build -t cr.yandex/${{ secrets.REGISTRY_ID }}/backend:${{ steps.version.outputs.version }} .
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/backend:${{ steps.version.outputs.version }}
+          docker tag cr.yandex/${{ secrets.REGISTRY_ID }}/backend:${{ steps.version.outputs.version }} \
+            cr.yandex/${{ secrets.REGISTRY_ID }}/backend:latest
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/backend:latest
+
+      - name: Prepare configs
+        run: |
+          mkdir -p deploy
+          
+          echo "REGISTRY_ID=${{ secrets.REGISTRY_ID }}" > deploy/.env
+          cp docker/docker-compose.yml deploy/
+
+      - name: Deploy configs
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.BACKEND_IP }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          source: "deploy/*"
+          target: "/opt/docker/"
+          strip_components: 1
+          overwrite: true
+
+      - name: Update services
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.BACKEND_IP }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          script: |
+            echo "${{ secrets.YC_PASSWORD }}" | docker login \
+            --username json_key \
+            --password-stdin \
+            cr.yandex
+            
+            cd /opt/docker
+            docker compose --env-file .env pull backend
+            docker compose --env-file .env up -d --no-deps backend
+            docker image prune -af

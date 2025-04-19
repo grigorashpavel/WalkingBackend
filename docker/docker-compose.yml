@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend-service
+    hostname: backend
+    image: cr.yandex/${REGISTRY_ID}/backend:latest
+    restart: always
+    networks:
+      - public_network
+      - internal_network
+    ports:
+      - "127.0.0.1:8000:8080"
+    volumes:
+      - backend_cache:/app/cache
+
+  math-model:
+    container_name: math-model-service
+    hostname: math-model
+    image: cr.yandex/${REGISTRY_ID}/math-model:latest
+    restart: always
+    networks:
+      - internal_network
+      - outbound_network
+    volumes:
+      - model_cache:/app/cache
+      - model_data:/app/data
+
+networks:
+  public_network:
+    name: public_network
+    driver: bridge
+    internal: false  # Публичная сеть
+
+  internal_network: # Внутреняя сеть
+    name: internal_network
+    driver: bridge
+    internal: true
+
+  outbound_network: # Сеть только для исходящего трафика
+    name: outbound_network
+    driver: bridge
+    internal: false
+
+volumes:
+  backend_cache:
+  model_cache:
+  model_data:
